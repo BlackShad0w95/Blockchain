@@ -1,6 +1,7 @@
 import functools
 from collections import OrderedDict
 from hash_util import hash_string_256, hash_block
+import json
 
 
 MINING_REWARD = 10
@@ -10,11 +11,36 @@ genesis_block = {'previous hash': '',
                  'transactions': [],
                  'proof': 100
                  }
+# Initializing our empty blockchain list
 blockchain = [genesis_block]
+# Unhandled transactions
 open_transaction = []
 owner = 'Domi'
+# Registered participants: Ourself + other people sending/ receiving coins
 participants = {'Domi'}
-#participants = set()
+# participants = set()
+
+
+def load_data():
+    with open('blockchain.txt', mode='r') as f:
+        file_content = f.readlines()
+        global blockchain
+        global open_transaction
+        blockchain = json.loads(file_content[0][:-1])
+        open_transaction = json.loads(file_content[1])
+
+
+load_data()
+
+
+def save_data():
+    with open('blockchain.txt', mode='w') as f:
+        # f.write(str(blockchain))
+        # f.write('\n')
+        # f.write(str(open_transaction))
+        f.write(json.dumps(blockchain))
+        f.write('\n')
+        f.write(json.dumps(open_transaction))
 
 
 def valid_proof(transactions, last_hash, proof):
@@ -91,6 +117,7 @@ def add_transaction(recipient, sender=owner, amount=1.0):
         open_transaction.append(transaction)
         participants.add(sender)
         participants.add(recipient)
+        save_data()
         return True
     return False
 
@@ -121,6 +148,7 @@ def mine_block():
              'proof': proof
              }
     blockchain.append(block)
+    save_data()
     return True
 
 
