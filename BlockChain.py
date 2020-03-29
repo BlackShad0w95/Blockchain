@@ -6,13 +6,8 @@ import pickle
 
 MINING_REWARD = 10
 
-genesis_block = {'previous_hash': '',
-                 'index': 0,
-                 'transactions': [],
-                 'proof': 100
-                 }
 # Initializing our empty blockchain list
-blockchain = [genesis_block]
+blockchain = []
 # Unhandled transactions
 open_transaction = []
 owner = 'Domi'
@@ -21,7 +16,7 @@ participants = {'Domi'}
 # participants = set()
 
 
-def load_data():
+def load_data(): 
     # PICKLE
     # with open('blockchain.p', mode='rb') as f:
     #     file_content = pickle.loads(f.read())
@@ -31,11 +26,11 @@ def load_data():
     #     open_transaction = file_content['ot']
 
     # JSON
+    global blockchain
+    global open_transaction
     try:
         with open('blockchain.txt', mode='r') as f:
             file_content = f.readlines()
-            global blockchain
-            global open_transaction
             blockchain = json.loads(file_content[0][:-1])
             updated_blockchain = []
             for block in blockchain:
@@ -54,19 +49,32 @@ def load_data():
                 updated_transactions.append(updated_transaction)
             open_transaction = updated_transactions
     except IOError:
-        print("File does not exist!")
+        genesis_block = {'previous_hash': '',
+                         'index': 0,
+                         'transactions': [],
+                         'proof': 100
+                         }
+        # Initializing our empty blockchain list
+        blockchain = [genesis_block]
+        # Unhandled transactions
+        open_transaction = []
     finally:
         print("cleanup")
+
 
 load_data()
 
 
 def save_data():
     # JSON
-    with open('blockchain.txt', mode='w') as f:
-        f.write(json.dumps(blockchain))
-        f.write('\n')
-        f.write(json.dumps(open_transaction))
+    try:
+        with open('blockchain.txt', mode='w') as f:
+            f.write(json.dumps(blockchain))
+            f.write('\n')
+            f.write(json.dumps(open_transaction))
+    except IOError:
+        print("Saving failed")
+
 
     # PICKLE
     # with open('blockchain.p', mode='wb') as f:
